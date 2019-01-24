@@ -39,6 +39,7 @@
 					}
 				},
 				dayClick:function(date,jsEvent,view){
+					limpiarFormulario();
 					/*alert(date.format());
 					alert("Vista "+view.name);
 					$(this).css('background-color','red');*/
@@ -58,6 +59,20 @@
 					$("#txtFecha").val(FechaHora[0]);
 					$("#txtHora").val(FechaHora[1]);
 					$("#ModalEventos").modal();
+				},
+				editable:true,
+				eventDrop:function(calEvent){
+					$("#txtID").val(calEvent.id);
+					$("#txtTitulo").val(calEvent.titulo);
+					$("#txtColor").val(calEvent.color);
+					$("#txtDescr").val(calEvent.descripcion);
+
+					var FechaHora=calEvent.start.format().split("T");
+					$("#txtFecha").val(FechaHora[0]);
+					$("#txtHora").val(FechaHora[1]);
+
+					RecolectarDatosGUI();
+					EnviarInformacion('modificar',NuevoEvento,true);
 				}
 			});
 		});
@@ -84,8 +99,8 @@
 	      <span>Color: </span><input type="color" name="FF0000" id="txtColor"><br/>
 	      <div class="modal-footer">
 	        <button type="button" id="btnAgregar" class="btn btn-primary">Agregar</button>
-	        <button type="button" class="btn btn-success">Modificar</button>
-	        <button type="button" class="btn btn-danger">Borrar</button>
+	        <button type="button" id="btnActualizar" class="btn btn-success">Modificar</button>
+	        <button type="button" id="btnEliminar" class="btn btn-danger">Borrar</button>
 	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>	        
 	      </div>
 	    </div>
@@ -96,6 +111,14 @@
 		$("#btnAgregar").click(function(){			
 			RecolectarDatosGUI();
 			EnviarInformacion('agregar',NuevoEvento);
+		});
+		$("#btnEliminar").click(function(){			
+			RecolectarDatosGUI();
+			EnviarInformacion('eliminar',NuevoEvento);
+		});
+		$("#btnActualizar").click(function(){			
+			RecolectarDatosGUI();
+			EnviarInformacion('modificar',NuevoEvento);
 		});
 		function RecolectarDatosGUI(){
 			NuevoEvento = {
@@ -108,7 +131,7 @@
 				end: $("#txtFecha").val() + " " + $("#txtHora").val()
 			};		
 		}
-		function EnviarInformacion(accion,objEvento){
+		function EnviarInformacion(accion,objEvento,modal){
 			$.ajax({
 				type: 'POST',
 				url: 'eventos.php?accion='+ accion,
@@ -116,13 +139,22 @@
 				success: function(msj){
 					if(msj){
 						$("#calendario").fullCalendar('refetchEvents');
-						$("#ModalEventos").modal('toggle');
+						if(!modal){
+							$("#ModalEventos").modal('toggle');
+						}						
 					}
 				},
 				error: function(){
 					alert("Error");
 				}
 			});
+		}
+
+		function limpiarFormulario(){
+			$("#txtID").val('');
+			$("#txtTitulo").val('');
+			$("#txtColor").val('');
+			$("#txtDescr").val('');
 		}
 	</script>
 </body>
